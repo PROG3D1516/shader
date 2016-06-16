@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js webgl - materials - shaders [custom]</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				color: #ffffff;
+				font-family:Monospace;
+				font-size:13px;
+				text-align:center;
+				font-weight: bold;
+
+				background-color: #050505;
+				margin: 0px;
+				overflow: hidden;
+			}
+
+			#info {
+				position: absolute;
+				top: 0px; width: 100%;
+				padding: 5px;
+			}
+
+			a {
+
+				color: #ffffff;
+			}
+
+			#oldie a { color:#da0 }
+		</style>
+	</head>
+	<body>
+
+		<div id="container"></div>
+	
+
+		<script src="js/three.js"></script>
+
+		<script src="js/Detector.js"></script>
+		<script src="js/libs/stats.min.js"></script>
+
+		<script id="vertexShader1" type="x-shader/x-vertex">
+
+
+			uniform float amplitude;
+
+			void main()
+			{
+				//vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+				//gl_Position = projectionMatrix * mvPosition;
+				//vec3 newposition = (position + normal * vec3(amplitude));
+				vec3 newposition = (position  * vec3(amplitude));
+				vec4 mvPosition = modelViewMatrix * vec4( newposition, 1.0 );
+				gl_Position = projectionMatrix * mvPosition;
+			}
+
+		</script>
+
+		<script id="fragmentshader1" type="x-shader/x-fragment">
+
+			uniform float color;
+
+			void main( void ) {
+
+				gl_FragColor = vec4( color, 1.0-color, 0.5, 1 );
+
+			}
+
+		</script>
+
+	
+
+
+
+		<script>
+
+			var container, stats;
+
+			var camera, scene, renderer;
+
+			var cube;
+
+			var uniforms;
+
+			var clock = new THREE.Clock();
+
+			var component;
+			var amplitude;
+
+			init();
+			animate();
+
+			function init() {
+
+
+				component = 0.0;
+				container = document.getElementById( 'container' );
+
+				camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 1, 3000 );
+
+				scene = new THREE.Scene();
+				camera.position.z = 10;
+				camera.position.x = 10;
+				camera.position.y = 10;
+				camera.lookAt(new THREE.Vector3(0,0,0));
+
+
+				var geometry2use = new THREE.BoxGeometry( 0.75, 0.75, 0.75 );
+
+				var geometry = new THREE.Geometry();
+
+// the vertices definitions
+var v0 = new THREE.Vector3(-1.0,-1.0,+1.0);
+var v1 = new THREE.Vector3(+1.0,-1.0,+1.0);
+var v2 = new THREE.Vector3(+1.0,-1.0,-1.0);
+var v3 = new THREE.Vector3(-1.0,-1.0,-1.0);
+var v4 = new THREE.Vector3(-0.5,+1.0,+0.5);
+var v5 = new THREE.Vector3(+0.5,+1.0,+0.5);
+var v6 = new THREE.Vector3(+0.5,+1.0,-0.5);
+var v7 = new THREE.Vector3(-0.5,+1.0,-0.5);
+
+// loading the vertices to the geometry
+geometry.vertices.push(v0);
+geometry.vertices.push(v1);
+geometry.vertices.push(v2);
+geometry.vertices.push(v3);
+geometry.vertices.push(v4);
+geometry.vertices.push(v5);
+geometry.vertices.push(v6);
+geometry.vertices.push(v7);
+
+//faces
+geometry.faces.push( new THREE.Face3(0,1,5) );
+geometry.faces.push( new THREE.Face3(0,5,4) );
+
+geometry.faces.push( new THREE.Face3(1,2,6) );
+geometry.faces.push( new THREE.Face3(1,6,5) );
+
+geometry.faces.push( new THREE.Face3(2,3,7) );
+geometry.faces.push( new THREE.Face3(2,7,6) );
+
+geometry.faces.push( new THREE.Face3(3,0,4) );
+geometry.faces.push( new THREE.Face3(3,4,7) );
+
+
+// bottom
+geometry.faces.push( new THREE.Face3(0,2,1) );
+geometry.faces.push( new THREE.Face3(0,3,2) );
+
+// top
+geometry.faces.push( new THREE.Face3(4,5,6) );
+geometry.faces.push( new THREE.Face3(4,6,7) );
+
+geometry.computeFaceNormals();
+geometry.computeVertexNormals();
+
+
+
+				function createMaterial(vs,fs) {
+
+					vertexShader = document.getElementById(vs).textContent;
+					fragmentShader = document.getElementById(fs).textContent;
+					//  attributes = {};
+					uniforms = {color:       { value: 1.0 },
+								amplitude :  { value:0.0  }
+							};
+
+					var meshMaterial = new THREE.ShaderMaterial({
+						uniforms: uniforms,
+						//attributes: attributes,
+						vertexShader: vertexShader,
+						fragmentShader: fragmentShader,
+						transparent: true,
+						wireframe:true
+						});
+					return meshMaterial;
+				}
+
+				var material = createMaterial("vertexShader1","fragmentshader1")
+				cube = new THREE.Mesh(geometry,material);
+				scene.add(cube);
+
+				renderer = new THREE.WebGLRenderer();
+				renderer.setPixelRatio( window.devicePixelRatio );
+				container.appendChild( renderer.domElement );
+
+				stats = new Stats();
+				container.appendChild( stats.dom );
+
+				onWindowResize();
+
+				window.addEventListener( 'resize', onWindowResize, false );
+
+			}
+
+			function onWindowResize( event ) {
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+			}
+
+			//
+
+			function animate() {
+
+				requestAnimationFrame( animate );
+
+				render();
+				stats.update();
+
+			}
+
+
+
+			function render() {
+
+				var delta = clock.getDelta();
+
+
+				//cube.rotation.y += delta;
+				//cube.rotation.x += delta;
+
+				component = (component + 0.05);
+
+				uniforms.color.value = Math.sin(component)/2 + 0.5;
+				uniforms.amplitude.value = 1 + Math.sin(component);
+
+				//console.log(uniforms.color.value);
+				console.log(uniforms.amplitude.value);
+
+
+				renderer.render( scene, camera );
+
+			}
+
+		</script>
+
+	</body>
+</html>
