@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<title>three.js webgl - materials - shaders [custom]</title>
+		<title>Shader 2</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<style>
@@ -17,18 +17,6 @@
 				overflow: hidden;
 			}
 
-			#info {
-				position: absolute;
-				top: 0px; width: 100%;
-				padding: 5px;
-			}
-
-			a {
-
-				color: #ffffff;
-			}
-
-			#oldie a { color:#da0 }
 		</style>
 	</head>
 	<body>
@@ -37,23 +25,25 @@
 	
 
 		<script src="js/three.js"></script>
-
 		<script src="js/Detector.js"></script>
 		<script src="js/libs/stats.min.js"></script>
 
-		<script id="vertexShader1" type="x-shader/x-vertex">
 
+		<script id="vertexShader1" type="x-shader/x-vertex">
 
 			uniform float amplitude;
 
 			void main()
 			{
-				//vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
-				//gl_Position = projectionMatrix * mvPosition;
-				//vec3 newposition = (position + normal * vec3(amplitude));
-				vec3 newposition = (position  * vec3(amplitude));
+				vec3 newposition = (position + normal * vec3(amplitude));
 				vec4 mvPosition = modelViewMatrix * vec4( newposition, 1.0 );
 				gl_Position = projectionMatrix * mvPosition;
+				
+				
+
+				//vec3 newposition = (position  * vec3(amplitude));
+				//vec4 mvPosition = modelViewMatrix * vec4( newposition, 1.0 );
+				//gl_Position = projectionMatrix * mvPosition;
 			}
 
 		</script>
@@ -90,6 +80,12 @@
 			var amplitude;
 
 			init();
+
+			wh = THREE.EdgesHelper(cube,0x000000);
+scene.add(cube);
+
+scene.add(wh);
+
 			animate();
 
 			function init() {
@@ -158,6 +154,12 @@ geometry.computeVertexNormals();
 
 
 
+debugger;
+
+
+
+
+
 				function createMaterial(vs,fs) {
 
 					vertexShader = document.getElementById(vs).textContent;
@@ -172,15 +174,15 @@ geometry.computeVertexNormals();
 						//attributes: attributes,
 						vertexShader: vertexShader,
 						fragmentShader: fragmentShader,
-						transparent: true,
-						wireframe:true
+						transparent: false,
+						wireframe:false
 						});
 					return meshMaterial;
 				}
 
 				var material = createMaterial("vertexShader1","fragmentshader1")
 				cube = new THREE.Mesh(geometry,material);
-				scene.add(cube);
+				//scene.add(cube);
 
 				renderer = new THREE.WebGLRenderer();
 				renderer.setPixelRatio( window.devicePixelRatio );
@@ -222,13 +224,14 @@ geometry.computeVertexNormals();
 				var delta = clock.getDelta();
 
 
-				//cube.rotation.y += delta;
-				//cube.rotation.x += delta;
+				cube.rotation.y += delta;
+				cube.rotation.x += delta;
 
 				component = (component + 0.05);
 
 				uniforms.color.value = Math.sin(component)/2 + 0.5;
-				uniforms.amplitude.value = 1 + Math.sin(component);
+				//uniforms.amplitude.value = 2 + Math.sin(component) * 2;
+				uniforms.amplitude.value = 0.5 + Math.random()*2.0;
 
 				//console.log(uniforms.color.value);
 				console.log(uniforms.amplitude.value);

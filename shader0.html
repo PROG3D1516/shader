@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<title>three.js webgl - materials - shaders [custom]</title>
+		<title>Shader 1</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<style>
@@ -16,19 +16,6 @@
 				margin: 0px;
 				overflow: hidden;
 			}
-
-			#info {
-				position: absolute;
-				top: 0px; width: 100%;
-				padding: 5px;
-			}
-
-			a {
-
-				color: #ffffff;
-			}
-
-			#oldie a { color:#da0 }
 		</style>
 	</head>
 	<body>
@@ -45,6 +32,7 @@
 
 			void main()
 			{
+				//shader minimalista: calcula a posição dos vértices
 				vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
 				gl_Position = projectionMatrix * mvPosition;
 			}
@@ -55,14 +43,12 @@
 
 
 			void main( void ) {
-
+				// shader minimalista: atribui a mesma cor a todos os fragmentos
 				gl_FragColor = vec4( 1.0, 0.5, 0.5, 1.0 );
 
 			}
 
 		</script>
-
-	
 
 
 
@@ -72,25 +58,48 @@
 
 			var camera, scene, renderer;
 
-			var cube;
+			var clock;
 
-			var clock = new THREE.Clock();
+			var modelo;
 
+
+
+			// inicialização da cena
 			init();
+			// animação
 			animate();
+
 
 			function init() {
 
 				container = document.getElementById( 'container' );
-
 				camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 1, 3000 );
 				camera.position.z = 4;
 
 				scene = new THREE.Scene();
 
-				var geometry = new THREE.BoxGeometry( 0.75, 0.75, 0.75 );
+				var geometry = new THREE.BoxGeometry( 1, 1, 1);
+				var material = createMaterial("vertexShader1","fragmentshader1");
 
-				function createMaterial(vs,fs) {
+				modelo = new THREE.Mesh(geometry,material);
+				scene.add(modelo);
+
+				renderer = new THREE.WebGLRenderer();
+				renderer.setPixelRatio( window.devicePixelRatio );
+				container.appendChild( renderer.domElement );
+
+				stats = new Stats();
+				container.appendChild( stats.dom );
+
+				clock = new THREE.Clock();
+
+				onWindowResize();
+
+				window.addEventListener( 'resize', onWindowResize, false );
+
+			}
+
+			function createMaterial(vs,fs) {
 					vertexShader = document.getElementById(vs).textContent;
 					fragmentShader = document.getElementById(fs).textContent;
 					//  attributes = {};
@@ -107,38 +116,18 @@
 					return meshMaterial;
 				}
 
-				var material = createMaterial("vertexShader1","fragmentshader1")
-				cube = new THREE.Mesh(geometry,material);
-				scene.add(cube);
-
-				renderer = new THREE.WebGLRenderer();
-				renderer.setPixelRatio( window.devicePixelRatio );
-				container.appendChild( renderer.domElement );
-
-				stats = new Stats();
-				container.appendChild( stats.dom );
-
-				onWindowResize();
-
-				window.addEventListener( 'resize', onWindowResize, false );
-
-			}
-
 			function onWindowResize( event ) {
 
 				camera.aspect = window.innerWidth / window.innerHeight;
 				camera.updateProjectionMatrix();
-
 				renderer.setSize( window.innerWidth, window.innerHeight );
 
 			}
 
-			//
 
 			function animate() {
 
 				requestAnimationFrame( animate );
-
 				render();
 				stats.update();
 
@@ -148,10 +137,8 @@
 
 				var delta = clock.getDelta();
 
-				cube.rotation.y += delta;
-				cube.rotation.x += delta;
-
-
+				modelo.rotation.y += delta;
+				modelo.rotation.x += delta;
 				renderer.render( scene, camera );
 
 			}
